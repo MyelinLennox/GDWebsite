@@ -1,5 +1,3 @@
-const button = document.querySelector("button");
-
 // Fetch the initial count from the server
 async function fetchCount() {
     try {
@@ -26,6 +24,3 @@ button.addEventListener("click", async () => {
         console.error("Failed to update server count:", error);
     }
 });
-
-// Load the initial count when the page loads
-fetchCount();
