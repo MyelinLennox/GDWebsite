@@ -12,13 +12,20 @@
 
     <div class="footer">
         <p>Lorem</p>
-    </div>
-    <div class="col-md-3">
-        <div class="card-counter info">
-            <i class="fa fa-users"></i>
-            <span class="count-numbers">35</span>
-            <span class="count-name">Users</span>
+   <div id="cntr"> 
+            The number of visitors is : 
+            <span>0</span>
         </div>
-    </div>
+
+       <script> 
+            function counter_fn(){
+                var counter = $('#cntr span').text(); // geting value from span
+                var count = 0;
+                count = parseInt(counter.value);
+                count = count+1;
+                counter.innerHTML = parseInt(count);
+           }
+           window.onload = counter_fn;  
+      </script>
 </body>
 </html>
