@@ -1,19 +1,13 @@
 body { 
-    margin: 0;
+  margin: 0;
 }
 
-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    width: 100%;
+h1 {
+  font-size: 32px;
+  color: #333;
 }
-
 .footer {
 
-    font-size: 32px;
-    bottom: 0;
+  font-size: 32px;
+  bottom: 0;
 }
