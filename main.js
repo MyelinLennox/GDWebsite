@@ -39,7 +39,7 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
     // Apply texture to the Grass object (assuming it has a mesh with materials)
     grass.traverse((child) => {
         if (child.isMesh) {
-            child.material.map = grassTexture;
+            child.material.Color = 0x649B66;
             child.material.needsUpdate = true;
         }
     });
@@ -75,6 +75,8 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
 function animate() {
     controls.update();
     renderer.render(scene, camera);
+    /*
     console.log(camera.position);
+    */
 }
 renderer.setAnimationLoop(animate);

@@ -15,7 +15,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Leaves 3.001",
+			"name":"Leaves 3.002",
 			"rotation":[
 				0.010781564749777317,
 				0.0032660376746207476,
@@ -28,21 +28,15 @@
 				1.2651221752166748
 			],
 			"translation":[
-				-0.32675492763519287,
+				9.80812931060791,
 				5.681252479553223,
 				-0.4291473627090454
 			]
 		}
 	],
-	"materials":[
-		{
-			"doubleSided":true,
-			"name":"StylizedLeafCollection"
-		}
-	],
 	"meshes":[
 		{
-			"name":"leaves.013",
+			"name":"leaves.001",
 			"primitives":[
 				{
 					"attributes":{
@@ -50,8 +44,7 @@
 						"NORMAL":1,
 						"TEXCOORD_0":2
 					},
-					"indices":3,
-					"material":0
+					"indices":3
 				}
 			]
 		}
@@ -69,7 +62,7 @@
 			"min":[
 				-4.3111348152160645,
 				-3.3570303916931152,
-				-3.0788888931274414
+				-3.0788891315460205
 			],
 			"type":"VEC3"
 		},
