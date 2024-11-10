@@ -151,4 +151,10 @@
 			"minFilter":9987
 		}
 	],
+	"buffers":[
+		{
+			"byteLength":133420,
+			"uri":"Grass.bin"
+		}
+	]
 }
