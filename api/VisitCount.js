@@ -1,4 +1,4 @@
-// api/visitCounter.js
+// VisitCount.js
 
 let visitCount = 0; // In-memory counter (resets if server restarts)
 
