@@ -24,8 +24,9 @@ controls.maxPolarAngle = Math.PI / 2;
 // Texture Loader
 const textureLoader = new THREE.TextureLoader();
 
-const grassTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Grass.png");
-const leavesTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Leaves.png");
+const grassMask = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Grass.png");
+const leavesMask = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Leaves.png");
+
 const treeTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Tree.png");
 const TreeoverlayTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/TCom_Overlay_Abstract32_1K_overlay.png");
 
@@ -39,7 +40,13 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
     // Apply texture to the Grass object (assuming it has a mesh with materials)
     grass.traverse((child) => {
         if (child.isMesh) {
-            child.material.Color = 0x649B66;
+            child.material = new THREE.MeshStandardMaterial({
+                map: grassMask,
+                color: 0x649B66,
+                transparent: true,
+                depthWrite: false, // Prevent clipping of transparent areas
+                side: THREE.DoubleSide // Ensure it's visible on both sides
+            });
             child.material.needsUpdate = true;
         }
     });
@@ -52,7 +59,12 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
     // Apply texture to the Tree object
     tree.traverse((child) => {
         if (child.isMesh) {
-            child.material.map = treeTexture;
+            child.material = new THREE.MeshStandardMaterial({
+                map: treeTexture,
+                transparent: true,
+                depthWrite: false, // Prevent clipping of transparent areas
+                side: THREE.DoubleSide // Ensure it's visible on both sides
+            });
             child.material.needsUpdate = true;
         }
     });
@@ -65,18 +77,37 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
     // Apply texture to the Leaves object
     leaves.traverse((child) => {
         if (child.isMesh) {
-            child.material.map = leavesTexture;
+            child.material = new THREE.MeshStandardMaterial({
+                map: leavesMask,
+                color: 0x649B66,
+                transparent: true,
+                depthWrite: false, // Prevent clipping of transparent areas
+                side: THREE.DoubleSide // Ensure it's visible on both sides
+            });
             child.material.needsUpdate = true;
         }
     });
 });
 
+
+// Ambient and Directional Light
+const light = new THREE.AmbientLight(0x404040); // soft white light
+scene.add(light);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(10, 10, 10).normalize();
+scene.add(directionalLight);
+
 // Animation Loop
 function animate() {
     controls.update();
     renderer.render(scene, camera);
-    /*
-    console.log(camera.position);
-    */
 }
 renderer.setAnimationLoop(animate);
+
+// Window resize handling
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
