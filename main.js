@@ -33,38 +33,26 @@ const TreeoverlayTexture = textureLoader.load("https://raw.githubusercontent.com
 // GLTF Loader
 const gltfLoader = new GLTFLoader();
 
+// Load and add grass model
 gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Grass.gltf", (gltf) => {
     const grass = gltf.scene;
     scene.add(grass);
 
-    // Traverse the grass object and modify UVs
+    // Apply texture to the Grass object (assuming it has a mesh with materials)
     grass.traverse((child) => {
         if (child.isMesh) {
-            const geometry = child.geometry;
-
-            // Flip the Y component of the UVs
-            if (geometry.attributes.uv) {
-                const uvs = geometry.attributes.uv.array;
-                for (let i = 1; i < uvs.length; i += 2) {
-                    uvs[i] = 1 - uvs[i];  // Flip the Y UV coordinate (1 - current Y value)
-                }
-
-                geometry.attributes.uv.needsUpdate = true; // Ensure the update is reflected
-            }
-
-            // Apply the texture to the mesh
             child.material = new THREE.MeshBasicMaterial({
                 map: grassMask,
                 color: 0x649B66,
                 transparent: true,
-                depthWrite: false,
-                side: THREE.DoubleSide
+                depthWrite: false // Prevent depth writing for transparent objects
             });
             child.material.needsUpdate = true;
         }
     });
 });
 
+// Load and add tree model
 gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Tree.gltf", (gltf) => {
     const tree = gltf.scene;
     scene.add(tree);
@@ -72,17 +60,14 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
     // Apply texture to the Tree object
     tree.traverse((child) => {
         if (child.isMesh) {
-            child.material = new THREE.MeshStandardMaterial({
-                map: treeTexture,
-                transparent: true,
-                depthWrite: false, // Prevent clipping of transparent areas
-                side: THREE.DoubleSide // Ensure it's visible on both sides
-            });
+            child.material.map = treeTexture;
+            child.material.depthWrite = true;  // Enable depth writing for opaque objects
             child.material.needsUpdate = true;
         }
     });
 });
 
+// Load and add leaves model
 gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Leaves.gltf", (gltf) => {
     const leaves = gltf.scene;
     scene.add(leaves);
@@ -90,37 +75,55 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
     // Apply texture to the Leaves object
     leaves.traverse((child) => {
         if (child.isMesh) {
-            child.material = new THREE.MeshStandardMaterial({
+            child.material = new THREE.MeshBasicMaterial({
                 map: leavesMask,
                 color: 0x649B66,
                 transparent: true,
-                depthWrite: false, // Prevent clipping of transparent areas
-                side: THREE.DoubleSide // Ensure it's visible on both sides
+                depthWrite: false // Prevent depth writing for transparent objects
             });
             child.material.needsUpdate = true;
         }
     });
 });
 
-
-// Ambient and Directional Light
+// Add light to the scene
 const light = new THREE.AmbientLight(0x404040); // soft white light
 scene.add(light);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(10, 10, 10).normalize();
-scene.add(directionalLight);
+// Separate opaque and transparent objects
+const opaqueObjects = [];
+const transparentObjects = [];
 
-// Animation Loop
+scene.traverse((child) => {
+    if (child.isMesh) {
+        if (child.material.transparent) {
+            transparentObjects.push(child);
+        } else {
+            opaqueObjects.push(child);
+        }
+    }
+});
+
+// Sort transparent objects by their distance from the camera (back-to-front)
+transparentObjects.sort((a, b) => {
+    const distanceA = camera.position.distanceTo(a.position);
+    const distanceB = camera.position.distanceTo(b.position);
+    return distanceB - distanceA;  // Sort in descending order (farthest to nearest)
+});
+
+// Animation loop
 function animate() {
+    // First, render all opaque objects
+    opaqueObjects.forEach((obj) => {
+        obj.renderOrder = 0;  // Ensure opaque objects render first
+    });
+
+    // Then, render all transparent objects
+    transparentObjects.forEach((obj) => {
+        obj.renderOrder = 1;  // Ensure transparent objects render after opaque objects
+    });
+
     controls.update();
     renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-
-// Window resize handling
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
