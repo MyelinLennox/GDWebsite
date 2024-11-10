@@ -1,88 +1,80 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xe6e6df);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 5;
+camera.position.set(10, 10, 10);
+camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// OrbitControls setup
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.screenSpacePanning = false;
+controls.maxPolarAngle = Math.PI / 2;
+
 // Texture Loader
 const textureLoader = new THREE.TextureLoader();
 
-const grassTexture = textureLoader.load(
-    "https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Grass.png",
-    undefined,
-    undefined,
-    (error) => console.error("Error loading Grass texture:", error)
-);
-
-const leavesTexture = textureLoader.load(
-    "https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Leaves.png",
-    undefined,
-    undefined,
-    (error) => console.error("Error loading Leaves texture:", error)
-);
-
-const overlayTexture = textureLoader.load(
-    "https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/TCom_Overlay_Abstract32_1K_overlay.png",
-    undefined,
-    undefined,
-    (error) => console.error("Error loading Overlay texture:", error)
-);
-
-const treeTexture = textureLoader.load(
-    "https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Tree.png",
-    undefined,
-    undefined,
-    (error) => console.error("Error loading Tree texture:", error)
-);
+const grassTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Grass.png");
+const leavesTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Leaves.png");
+const treeTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Tree.png");
+const TreeoverlayTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/TCom_Overlay_Abstract32_1K_overlay.png");
 
 // GLTF Loader
 const gltfLoader = new GLTFLoader();
 
-// Load Grass Model
-gltfLoader.load(
-    "https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Grass.gltf",
-    (gltf) => {
-        scene.add(gltf.scene);
-    },
-    undefined,
-    (error) => console.error("Error loading Grass model:", error)
-);
+gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Grass.gltf", (gltf) => {
+    const grass = gltf.scene;
+    scene.add(grass);
 
-// Load Tree Model
-gltfLoader.load(
-    "https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Tree.gltf",
-    (gltf) => {
-        scene.add(gltf.scene);
-    },
-    undefined,
-    (error) => console.error("Error loading Tree model:", error)
-);
+    // Apply texture to the Grass object (assuming it has a mesh with materials)
+    grass.traverse((child) => {
+        if (child.isMesh) {
+            child.material.map = grassTexture;
+            child.material.needsUpdate = true;
+        }
+    });
+});
 
-// Example mesh with Grass Texture
-const grassMaterial = new THREE.MeshBasicMaterial({ map: grassTexture });
-const grassGeometry = new THREE.PlaneGeometry(5, 5);
-const grassMesh = new THREE.Mesh(grassGeometry, grassMaterial);
-grassMesh.position.set(-3, 0, 0);
-scene.add(grassMesh);
+gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Tree.gltf", (gltf) => {
+    const tree = gltf.scene;
+    scene.add(tree);
 
-// Example mesh with Tree Texture
-const treeMaterial = new THREE.MeshBasicMaterial({ map: treeTexture });
-const treeGeometry = new THREE.PlaneGeometry(5, 5);
-const treeMesh = new THREE.Mesh(treeGeometry, treeMaterial);
-treeMesh.position.set(3, 0, 0);
-scene.add(treeMesh);
+    // Apply texture to the Tree object
+    tree.traverse((child) => {
+        if (child.isMesh) {
+            child.material.map = treeTexture;
+            child.material.needsUpdate = true;
+        }
+    });
+});
+
+gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Leaves.gltf", (gltf) => {
+    const leaves = gltf.scene;
+    scene.add(leaves);
+
+    // Apply texture to the Leaves object
+    leaves.traverse((child) => {
+        if (child.isMesh) {
+            child.material.map = leavesTexture;
+            child.material.needsUpdate = true;
+        }
+    });
+});
 
 // Animation Loop
 function animate() {
+    controls.update();
     renderer.render(scene, camera);
+    console.log(camera.position);
 }
 renderer.setAnimationLoop(animate);
-
