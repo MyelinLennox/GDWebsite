@@ -37,15 +37,28 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
     const grass = gltf.scene;
     scene.add(grass);
 
-    // Apply texture to the Grass object (assuming it has a mesh with materials)
+    // Traverse the grass object and modify UVs
     grass.traverse((child) => {
         if (child.isMesh) {
-            child.material = new THREE.MeshStandardMaterial({
+            const geometry = child.geometry;
+
+            // Flip the Y component of the UVs
+            if (geometry.attributes.uv) {
+                const uvs = geometry.attributes.uv.array;
+                for (let i = 1; i < uvs.length; i += 2) {
+                    uvs[i] = 1 - uvs[i];  // Flip the Y UV coordinate (1 - current Y value)
+                }
+
+                geometry.attributes.uv.needsUpdate = true; // Ensure the update is reflected
+            }
+
+            // Apply the texture to the mesh
+            child.material = new THREE.MeshBasicMaterial({
                 map: grassMask,
                 color: 0x649B66,
                 transparent: true,
-                depthWrite: false, // Prevent clipping of transparent areas
-                side: THREE.DoubleSide // Ensure it's visible on both sides
+                depthWrite: false,
+                side: THREE.DoubleSide
             });
             child.material.needsUpdate = true;
         }

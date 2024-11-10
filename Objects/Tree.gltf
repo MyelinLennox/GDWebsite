@@ -37,10 +37,9 @@
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
-						"TEXCOORD_0":2,
-						"TEXCOORD_1":3
+						"TEXCOORD_0":2
 					},
-					"indices":4
+					"indices":3
 				}
 			]
 		}
@@ -76,12 +75,6 @@
 		},
 		{
 			"bufferView":3,
-			"componentType":5126,
-			"count":15459,
-			"type":"VEC2"
-		},
-		{
-			"bufferView":4,
 			"componentType":5123,
 			"count":59820,
 			"type":"SCALAR"
@@ -108,20 +101,14 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":123672,
-			"byteOffset":494688,
-			"target":34962
-		},
-		{
-			"buffer":0,
 			"byteLength":119640,
-			"byteOffset":618360,
+			"byteOffset":494688,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":738000,
+			"byteLength":614328,
 			"uri":"Tree.bin"
 		}
 	]
