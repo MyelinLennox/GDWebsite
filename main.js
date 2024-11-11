@@ -14,6 +14,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Enable shadow mapping
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Soft shadows
+
 // OrbitControls setup
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -24,11 +28,11 @@ controls.maxPolarAngle = Math.PI / 2;
 // Texture Loader
 const textureLoader = new THREE.TextureLoader();
 
+// Load textures
 const grassMask = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Grass.png");
 const leavesMask = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Leaves.png");
-
 const treeTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Tree.png");
-const TreeoverlayTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/TCom_Overlay_Abstract32_1K_overlay.png");
+const noiseTexture = textureLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/heads/main/Objects/Noise.png");  // Noise texture for grass variation
 
 // GLTF Loader
 const gltfLoader = new GLTFLoader();
@@ -38,16 +42,27 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
     const grass = gltf.scene;
     scene.add(grass);
 
-    // Apply texture to the Grass object (assuming it has a mesh with materials)
+    // Apply noise texture for variation
+    const grassMaterial = new THREE.MeshStandardMaterial({
+        map: grassMask,
+        color: 0x649B66,
+        transparent: true,
+        depthWrite: false, // Prevent depth writing for transparent objects
+        emissive: 0x2f5b2e,  // Light emission to brighten the grass
+        roughness: 0.8,
+        metalness: 0.2,
+        normalMap: noiseTexture, // Adding noise texture to simulate uneven surface
+        displacementMap: noiseTexture, // Can add displacement to make grass irregular
+        displacementScale: 0.1,
+        emissiveIntensity: 0.2
+    });
+
     grass.traverse((child) => {
         if (child.isMesh) {
-            child.material = new THREE.MeshBasicMaterial({
-                map: grassMask,
-                color: 0x649B66,
-                transparent: true,
-                depthWrite: false // Prevent depth writing for transparent objects
-            });
+            child.material = grassMaterial;
             child.material.needsUpdate = true;
+            child.castShadow = true;
+            child.receiveShadow = true;
         }
     });
 });
@@ -63,6 +78,8 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
             child.material.map = treeTexture;
             child.material.depthWrite = true;  // Enable depth writing for opaque objects
             child.material.needsUpdate = true;
+            child.castShadow = true;
+            child.receiveShadow = true;
         }
     });
 });
@@ -82,13 +99,28 @@ gltfLoader.load("https://raw.githubusercontent.com/MyelinLennox/GDWebsite/refs/h
                 depthWrite: false // Prevent depth writing for transparent objects
             });
             child.material.needsUpdate = true;
+            child.castShadow = true;
+            child.receiveShadow = true;
         }
     });
 });
 
-// Add light to the scene
-const light = new THREE.AmbientLight(0x404040); // soft white light
-scene.add(light);
+// Lighting Setup
+const ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Soft white light
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5); // Increased intensity for better brightness
+directionalLight.position.set(1, 1, 1).normalize();
+directionalLight.castShadow = true; // Enable shadows for directional light
+scene.add(directionalLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 1, 100); // Point light (like a light bulb)
+pointLight.position.set(0, 5, 0);
+pointLight.castShadow = true; // Enable shadows for point light
+scene.add(pointLight);
+
+const hemisphereLight = new THREE.HemisphereLight(0x6060ff, 0x404040, 1); // Simulating sky and ground lighting
+scene.add(hemisphereLight);
 
 // Separate opaque and transparent objects
 const opaqueObjects = [];
@@ -120,7 +152,7 @@ function animate() {
 
     // Then, render all transparent objects
     transparentObjects.forEach((obj) => {
-        obj.renderOrder = 1;  // Ensure transparent objects render after opaque objects
+        obj.renderOrder = 1;  // Ensure transparent objects render after opaque
     });
 
     controls.update();
